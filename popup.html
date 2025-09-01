@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlowTrace - User Flow Recorder</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            width: 380px;
+            height: 450px;
+            max-height: 450px;
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #2563eb 100%);
+            color: white;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .relative { position: relative; }
+        .fixed { position: fixed; }
+        .absolute { position: absolute; }
+        .flex { display: flex; }
+        .grid { display: grid; }
+        .hidden { 
+            display: none !important; 
+        }
+        .block { display: block; }
+        
+        .tab-content {
+            display: block;
+        }
+        
+        .tab-content.hidden {
+            display: none !important;
+        }
+        .inline-block { display: inline-block; }
+        .inline-flex { display: inline-flex; }
+        
+        .items-center { align-items: center; }
+        .items-start { align-items: flex-start; }
+        .justify-center { justify-content: center; }
+        .justify-between { justify-content: space-between; }
+        .justify-start { justify-content: flex-start; }
+        
+        .flex-1 { flex: 1 1 0%; }
+        .flex-col { flex-direction: column; }
+        
+        .space-x-1 > * + * { margin-left: 0.25rem; }
+        .space-x-2 > * + * { margin-left: 0.5rem; }
+        .space-x-3 > * + * { margin-left: 0.75rem; }
+        .space-y-2 > * + * { margin-top: 0.5rem; }
+        .space-y-4 > * + * { margin-top: 1rem; }
+        
+        .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .gap-3 { gap: 0.75rem; }
+        
+        .p-1 { padding: 0.25rem; }
+        .p-2 { padding: 0.5rem; }
+        .p-3 { padding: 0.75rem; }
+        .p-4 { padding: 1rem; }
+        .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+        .px-4 { padding-left: 1rem; padding-right: 1rem; }
+        .px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+        .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+        .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+        .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+        .py-4 { padding-top: 1rem; padding-bottom: 1rem; }
+        .py-5 { padding-top: 1.25rem; padding-bottom: 1.25rem; }
+        .py-8 { padding-top: 2rem; padding-bottom: 2rem; }
+        .py-2\.5 { padding-top: 0.625rem; padding-bottom: 0.625rem; }
+        .py-1\.5 { padding-top: 0.375rem; padding-bottom: 0.375rem; }
+        
+        .mb-1 { margin-bottom: 0.25rem; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .mt-1 { margin-top: 0.25rem; }
+        
+        .w-2 { width: 0.5rem; }
+        .w-8 { width: 2rem; }
+        .w-11 { width: 2.75rem; }
+        .w-16 { width: 4rem; }
+        .w-20 { width: 5rem; }
+        .w-full { width: 100%; }
+        .min-w-\[1rem\] { min-width: 1rem; }
+        .min-w-\[2rem\] { min-width: 2rem; }
+        
+        .h-1 { height: 0.25rem; }
+        .h-2 { height: 0.5rem; }
+        .h-5 { height: 1.25rem; }
+        .h-6 { height: 1.5rem; }
+        .h-8 { height: 2rem; }
+        
+        .max-h-64 { max-height: 16rem; }
+        .max-h-80 { max-height: 20rem; }
+        
+        .text-xs { font-size: 0.75rem; line-height: 1rem; }
+        .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+        .text-base { font-size: 1rem; line-height: 1.5rem; }
+        .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+        .text-xl { font-size: 1.25rem; line-height: 1.75rem; }
+        .text-2xl { font-size: 1.5rem; line-height: 2rem; }
+        .text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
+        
+        .font-medium { font-weight: 500; }
+        .font-semibold { font-weight: 600; }
+        .font-bold { font-weight: 700; }
+        
+        .text-white { color: rgb(255 255 255); }
+        .text-white\/50 { color: rgb(255 255 255 / 0.5); }
+        .text-white\/60 { color: rgb(255 255 255 / 0.6); }
+        .text-white\/70 { color: rgb(255 255 255 / 0.7); }
+        .text-white\/90 { color: rgb(255 255 255 / 0.9); }
+        .text-red-400 { color: rgb(248 113 113); }
+        .text-indigo-300 { color: rgb(165 180 252); }
+        .text-yellow-300 { color: rgb(253 224 71); }
+        
+        .bg-green-400 { background-color: rgb(74 222 128); }
+        .bg-white\/10 { background-color: rgb(255 255 255 / 0.1); }
+        .bg-white\/20 { background-color: rgb(255 255 255 / 0.2); }
+        .bg-red-500\/20 { background-color: rgb(239 68 68 / 0.2); }
+        .bg-indigo-500 { background-color: rgb(99 102 241); }
+        
+        .border { border-width: 1px; }
+        .border-b { border-bottom-width: 1px; }
+        .border-white\/10 { border-color: rgb(255 255 255 / 0.1); }
+        .border-white\/20 { border-color: rgb(255 255 255 / 0.2); }
+        
+        .rounded-full { border-radius: 9999px; }
+        .rounded-lg { border-radius: 0.5rem; }
+        .rounded-xl { border-radius: 0.75rem; }
+        .rounded-2xl { border-radius: 1rem; }
+        
+        .text-center { text-align: center; }
+        .cursor-pointer { cursor: pointer; }
+        .overflow-hidden { overflow: hidden; }
+        .overflow-y-auto { overflow-y: auto; }
+        
+        .transition-all { transition-property: all; }
+        .transition-colors { transition-property: color, background-color, border-color, text-decoration-color, fill, stroke; }
+        .transition-transform { transition-property: transform; }
+        .duration-300 { transition-duration: 300ms; }
+        
+        .appearance-none { appearance: none; }
+        .sr-only { 
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+        
+        .glass-morphism {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        }
+        
+        .glass-button {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            color: white;
+        }
+        
+        .glass-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .glass-button:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .glass-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .glass-button:disabled:hover {
+            transform: none;
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: none;
+        }
+        
+        .recording-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        .session-item {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .session-item:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-1px);
+        }
+        
+        .session-item.selected {
+            background: rgba(99, 102, 241, 0.2);
+            border-color: rgba(99, 102, 241, 0.4);
+        }
+        
+        .material-icons {
+            font-family: 'Material Icons';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 20px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        .scrollbar-thin {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.4) rgba(255, 255, 255, 0.1);
+        }
+        
+        .scrollbar-thin::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .scrollbar-thin::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            margin: 2px;
+        }
+        
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+            background-color: rgba(255, 255, 255, 0.4);
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+            background-color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .scrollbar-thin::-webkit-scrollbar-corner {
+            background: transparent;
+        }
+        
+
+        
+        /* Range Slider */
+        .range-slider {
+            appearance: none;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 0.5rem;
+            height: 0.25rem;
+            cursor: pointer;
+        }
+        
+        .range-slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 1rem;
+            height: 1rem;
+            border-radius: 50%;
+            background: rgb(99 102 241);
+            cursor: pointer;
+        }
+        
+        .range-slider::-moz-range-thumb {
+            width: 1rem;
+            height: 1rem;
+            border-radius: 50%;
+            background: rgb(99 102 241);
+            cursor: pointer;
+            border: none;
+        }
+        
+        /* Select */
+        .select-input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 0.875rem;
+            border-radius: 0.5rem;
+            padding: 0.375rem 0.75rem;
+            transition: all 0.3s;
+        }
+        
+        .select-input:focus {
+            outline: none;
+            border-color: rgb(99 102 241);
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.5);
+        }
+        
+        .select-input option {
+            background: #4f46e5;
+            color: white;
+        }
+        
+        /* Animations */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+        
+        .animate-fade-in {
+            animation: fadeIn 0.2s ease-out;
+        }
+        
+        /* Tab specific styles */
+        .tab-btn {
+            color: rgba(255, 255, 255, 0.7);
+            transition: all 0.3s;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .tab-btn:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .tab-btn.active {
+            background: rgba(255, 255, 255, 0.2) !important;
+            color: white !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .group:hover .group-hover\:scale-110 {
+            transform: scale(1.1);
+        }
+        
+        /* Utility classes for specific sizes */
+        .text-base .material-icons { font-size: 16px; }
+        .text-lg .material-icons { font-size: 18px; }
+        .text-xl .material-icons { font-size: 20px; }
+        .text-xs .material-icons { font-size: 12px; }
+        .text-3xl .material-icons { font-size: 30px; }
+        
+        /* Scrollbar styling */
+        .scrollbar-thin::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .scrollbar-thin::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+        
+        .scrollbar-thin::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+        }
+        
+        .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <!-- Main Container -->
+    <div class="relative flex flex-col h-full">
+        <!-- Header -->
+        <div class="px-6 py-5 border-b border-white/10">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);">
+                        <span class="material-icons text-white text-lg">play_circle</span>
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-semibold text-white">FlowTrace</h1>
+                        <p class="text-xs text-white/70">User Flow Recorder & Playback</p>
+                    </div>
+                </div>
+                <div class="text-xs text-white/50 font-medium">v1.0.0</div>
+            </div>
+        </div>
+
+        <!-- Status Bar -->
+        <div class="px-6 py-1">
+            <div class="glass-morphism rounded-lg p-2">
+                <div class="flex items-center space-x-2">
+                    <div class="w-1.5 h-1.5 bg-green-400 rounded-full"></div>
+                    <span id="status" class="text-xs text-white/90 font-medium">Ready to record</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="px-6 py-4">
+            <div class="glass-morphism rounded-xl p-1 flex space-x-1">
+                <button class="tab-btn flex-1 py-2.5 px-2 rounded-lg text-sm font-medium transition-all duration-300 flex items-center justify-center space-x-2 active" data-tab="home">
+                    <span class="material-icons text-base">home</span>
+                    <span>Home</span>
+                </button>
+                <button class="tab-btn flex-1 py-2.5 px-2 rounded-lg text-sm font-medium transition-all duration-300 flex items-center justify-center space-x-2" data-tab="sessions">
+                    <span class="material-icons text-base">video_library</span>
+                    <span>Sessions</span>
+                </button>
+                <button class="tab-btn flex-1 py-2.5 px-2 rounded-lg text-sm font-medium transition-all duration-300 flex items-center justify-center space-x-2" data-tab="settings">
+                    <span class="material-icons text-base">settings</span>
+                    <span>Settings</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Tab Contents -->
+        <div class="px-6 flex-1 overflow-hidden" style="padding-bottom: 1.5rem; max-height: calc(450px - 180px);">
+            <!-- Home Tab -->
+            <div class="tab-content" id="home-tab">
+                <div class="space-y-4">
+                    <!-- Recording Button -->
+                    <div class="text-center">
+                        <button id="recordBtn" class="glass-button w-full py-4 px-6 rounded-2xl font-semibold text-white flex items-center justify-center space-x-3 group">
+                            <span class="material-icons text-xl group-hover:scale-110 transition-transform">fiber_manual_record</span>
+                            <span>Start Recording</span>
+                        </button>
+                    </div>
+
+
+
+                    <!-- Quick Stats -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="glass-morphism rounded-xl p-4 text-center">
+                            <div class="text-2xl font-bold text-white" id="totalSessions">0</div>
+                            <div class="text-xs text-white/70 font-medium">Total Sessions</div>
+                        </div>
+                        <div class="glass-morphism rounded-xl p-4 text-center">
+                            <div class="text-2xl font-bold text-white" id="totalActions">0</div>
+                            <div class="text-xs text-white/70 font-medium">Total Actions</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sessions Tab -->
+            <div class="tab-content hidden" id="sessions-tab">
+                <div class="space-y-4 h-full max-h-full overflow-y-auto scrollbar-thin" style="max-height: calc(450px - 220px);">
+                    <!-- Session Controls -->
+                    <div class="flex space-x-2">
+                        <button id="playbackBtn" disabled class="glass-button flex-1 py-3 px-4 rounded-xl font-medium text-white flex items-center justify-center space-x-2">
+                            <span class="material-icons text-lg">play_arrow</span>
+                            <span>Play Session</span>
+                        </button>
+                        <button id="exportBtn" class="glass-button py-3 px-4 rounded-xl text-white" title="Export selected session as JSON file">
+                            <span class="material-icons text-lg">download</span>
+                        </button>
+                        <button id="importBtn" class="glass-button py-3 px-4 rounded-xl text-white" title="Import session from JSON file">
+                            <span class="material-icons text-lg">upload</span>
+                        </button>
+                        <input type="file" id="fileInput" class="hidden" accept=".json">
+                    </div>
+
+                    <!-- Sessions List -->
+                    <div class="glass-morphism rounded-xl p-4">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-sm font-semibold text-white">Recorded Sessions</h3>
+                            <div class="flex items-center space-x-2">
+                                <button id="deleteAllBtn" class="glass-button p-1 rounded-full hover:bg-red-500/20 transition-colors" title="Delete all sessions">
+                                    <span class="material-icons text-red-400 text-base">delete_sweep</span>
+                                </button>
+                                <span class="material-icons text-white/50 text-lg">history</span>
+                            </div>
+                        </div>
+                        <div id="sessionsList" class="space-y-2">
+                            <div class="text-center py-8 text-white/60">
+                                <span class="material-icons text-3xl mb-2 block">video_library</span>
+                                <p class="text-sm">No sessions recorded yet</p>
+                                <p class="text-xs mt-1">Start recording to create your first session</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div class="tab-content hidden" id="settings-tab">
+                <div class="space-y-4 h-full max-h-full overflow-y-auto scrollbar-thin" style="max-height: calc(450px - 220px);">
+                    <!-- Playback Settings -->
+                    <div class="glass-morphism rounded-xl p-4">
+                        <div class="flex items-center space-x-2 mb-4">
+                            <span class="material-icons text-indigo-300">play_circle</span>
+                            <h3 class="text-sm font-semibold text-white">Playback Settings</h3>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <label class="text-sm text-white/90 font-medium">Playback Speed</label>
+                                <div class="flex items-center space-x-3">
+                                    <input type="range" id="playbackSpeed" min="0.25" max="4" step="0.25" value="1" 
+                                           class="w-20 range-slider">
+                                    <span id="speedValue" class="text-sm font-semibold text-white min-w-[2rem]">1x</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <label class="text-sm text-white/90 font-medium">Visual Indicators</label>
+                                <input type="checkbox" id="visualIndicators" checked class="w-4 h-4">
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <label class="text-sm text-white/90 font-medium">Auto-scroll</label>
+                                <input type="checkbox" id="autoScroll" checked class="w-4 h-4">
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <label class="text-sm text-white/90 font-medium">Animation Style</label>
+                                <select id="animationStyle" class="select-input">
+                                    <option value="default">Default</option>
+                                    <option value="minimal">Minimal</option>
+                                    <option value="enhanced">Enhanced</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recording Settings -->
+                    <div class="glass-morphism rounded-xl p-4">
+                        <div class="flex items-center space-x-2 mb-4">
+                            <span class="material-icons text-red-400">fiber_manual_record</span>
+                            <h3 class="text-sm font-semibold text-white">Recording Settings</h3>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <label class="text-sm text-white/90 font-medium">Recording Quality</label>
+                                <select id="recordingQuality" class="select-input">
+                                    <option value="high">High</option>
+                                    <option value="medium" selected>Medium</option>
+                                    <option value="low">Low</option>
+                                </select>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <label class="text-sm text-white/90 font-medium">Include Mouse Movements</label>
+                                <input type="checkbox" id="includeMouseMoves" class="w-4 h-4">
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <label class="text-sm text-white/90 font-medium">Recording Indicator</label>
+                                <input type="checkbox" id="showRecordingIndicator" checked class="w-4 h-4">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Advanced Settings -->
+                    <div class="glass-morphism rounded-xl p-4">
+                        <div class="flex items-center space-x-2 mb-4">
+                            <span class="material-icons text-yellow-300">tune</span>
+                            <h3 class="text-sm font-semibold text-white">Advanced Settings</h3>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <label class="text-sm text-white/90 font-medium">Element Detection</label>
+                                <select id="elementDetection" class="select-input">
+                                    <option value="strict">Strict</option>
+                                    <option value="flexible" selected>Flexible</option>
+                                    <option value="aggressive">Aggressive</option>
+                                </select>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <label class="text-sm text-white/90 font-medium">Debug Mode</label>
+                                <input type="checkbox" id="debugMode" class="w-4 h-4">
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <label class="text-sm text-white/90 font-medium">Max Retry Attempts</label>
+                                <div class="flex items-center space-x-3">
+                                    <input type="range" id="maxRetries" min="1" max="5" value="3" 
+                                           class="w-16 range-slider">
+                                    <span id="retriesValue" class="text-sm font-semibold text-white min-w-[1rem]">3</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html> 

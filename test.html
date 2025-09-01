@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session Replay Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .test-section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+        }
+        
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 5px;
+            font-size: 16px;
+        }
+        
+        button:hover {
+            background: #45a049;
+        }
+        
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        .result {
+            margin: 10px 0;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 4px;
+            min-height: 20px;
+        }
+        
+        .clickable-area {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        
+        .clickable-area:hover {
+            background: #bbdefb;
+        }
+        
+        #status {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: #333;
+            color: white;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div id="status">Ready for testing</div>
+    
+    <h1>🎬 Session Replay Test Page</h1>
+    <p>Use this page to test the session recording and replay functionality. Record some actions and then play them back to see if they're executed properly!</p>
+    
+    <div class="test-section">
+        <h2>🖱️ Click Tests</h2>
+        <button id="clickBtn" onclick="handleClick()">Click Me!</button>
+        <button id="counterBtn" onclick="incrementCounter()">Counter: <span id="counter">0</span></button>
+        <div class="result" id="clickResult">Click results will appear here...</div>
+    </div>
+    
+    <div class="test-section">
+        <h2>⌨️ Input Tests</h2>
+        <input type="text" id="textInput" placeholder="Type something here..." onchange="handleInput(this)">
+        <textarea id="textArea" placeholder="Type in this text area..." onchange="handleTextArea(this)" rows="3"></textarea>
+        <div class="result" id="inputResult">Input results will appear here...</div>
+    </div>
+    
+    <div class="test-section">
+        <h2>📜 Scroll Test</h2>
+        <div style="height: 300px; overflow-y: scroll; border: 1px solid #ddd; padding: 20px;">
+            <p>Scroll within this area to test scroll recording and replay.</p>
+            <div style="height: 800px; background: linear-gradient(to bottom, #ffebee, #e8f5e8);">
+                <p style="margin-top: 100px;">Content 1</p>
+                <p style="margin-top: 100px;">Content 2</p>
+                <p style="margin-top: 100px;">Content 3</p>
+                <p style="margin-top: 100px;">Content 4</p>
+                <p style="margin-top: 100px;">Content 5</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>🎯 Interactive Area</h2>
+        <div class="clickable-area" onclick="handleAreaClick(event)">
+            Click anywhere in this area
+            <div id="areaResult">Coordinates will appear here</div>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>📋 Form Test</h2>
+        <form id="testForm" onsubmit="handleFormSubmit(event)">
+            <input type="text" name="name" placeholder="Your name" required>
+            <input type="email" name="email" placeholder="Your email" required>
+            <button type="submit">Submit Form</button>
+        </form>
+        <div class="result" id="formResult">Form results will appear here...</div>
+    </div>
+    
+    <script>
+        let clickCount = 0;
+        let counter = 0;
+        
+        function updateStatus(message) {
+            document.getElementById('status').textContent = message;
+            setTimeout(() => {
+                document.getElementById('status').textContent = 'Ready for testing';
+            }, 3000);
+        }
+        
+        function handleClick() {
+            clickCount++;
+            document.getElementById('clickResult').innerHTML = `Button clicked ${clickCount} times! ✅`;
+            updateStatus('Click detected!');
+        }
+        
+
+        function incrementCounter() {
+            counter++;
+            document.getElementById('counter').textContent = counter;
+            updateStatus('Counter incremented!');
+        }
+        
+        function handleInput(element) {
+            document.getElementById('inputResult').innerHTML = `Text input changed to: "${element.value}" ✅`;
+            updateStatus('Input detected!');
+        }
+        
+        function handleTextArea(element) {
+            document.getElementById('inputResult').innerHTML = `Textarea changed to: "${element.value}" ✅`;
+            updateStatus('Textarea input detected!');
+        }
+        
+        function handleAreaClick(event) {
+            const rect = event.target.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            document.getElementById('areaResult').innerHTML = `Clicked at (${Math.round(x)}, ${Math.round(y)}) ✅`;
+            updateStatus('Area click detected!');
+        }
+        
+        function handleFormSubmit(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const data = Object.fromEntries(formData.entries());
+            document.getElementById('formResult').innerHTML = `Form submitted with: ${JSON.stringify(data)} ✅`;
+            updateStatus('Form submitted!');
+        }
+        
+        // Log page load
+        console.log('🎬 Test page loaded - ready for session recording!');
+        updateStatus('Page loaded - start recording!');
+    </script>
+</body>
+</html> 
