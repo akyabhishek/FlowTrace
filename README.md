@@ -1,31 +1,36 @@
-# FlowTrace - User Flow Recorder & Playback Browser Extension
+# FlowTrace - User Flow Tracing Browser Extension
 
-A powerful browser extension for tracing user flows and interactions for comprehensive testing and debugging. FlowTrace is perfect for testers who want to capture user journeys and visualize them later without actually executing the actions.
+![FlowTrace Preview](./flowtrace-preview.jpg)
+
+A powerful browser extension for tracing user flows and interactions for comprehensive testing and debugging. FlowTrace captures user interaction patterns to help developers, testers, and UX researchers understand user behavior and optimize workflows.
 
 ## 🎯 Features
 
-- **Flow Tracing**: Capture all user interactions including clicks, keyboard input, scrolling, form submissions, and more
-- **Visual Playback**: Play back recorded flows with visual indicators showing where each action occurred
-- **Flow Management**: Save, organize, and manage multiple recorded user flows
-- **Export/Import**: Share flow traces with team members or save them for later use
-- **Non-Intrusive Tracing**: Minimal impact on page performance during recording
-- **Cross-Page Support**: Works on any website (http/https)
+- **Flow Tracing**: Capture and trace all user interactions including clicks, keyboard input, scrolling, form submissions, and navigation
+- **Real-time Monitoring**: Track user flows as they happen across web pages
+- **Comprehensive Logging**: Generate detailed interaction logs for testing and debugging
+- **Cross-Domain Support**: Works seamlessly on any website (http/https)
+- **Developer Tools Integration**: Perfect for QA testing, bug reproduction, and user journey analysis
+- **Lightweight Performance**: Minimal impact on page performance during tracing
 
 ## 📦 Installation
 
 ### From Source (Developer Mode)
 
 1. **Clone or download this repository**
+
    ```bash
    git clone <repository-url>
-   cd session-recorder-extension
+   cd FlowTrace
    ```
 
 2. **Open Chrome and navigate to Extensions**
+
    - Go to `chrome://extensions/`
    - Enable "Developer mode" (toggle in the top right)
 
 3. **Load the extension**
+
    - Click "Load unpacked"
    - Select the folder containing the extension files
    - The extension should now appear in your extensions list
@@ -36,58 +41,50 @@ A powerful browser extension for tracing user flows and interactions for compreh
 
 ## 🚀 Usage
 
-### Recording a Flow
+### Starting Flow Tracing
 
-1. **Navigate to the webpage** you want to test
-2. **Click the extension icon** in the browser toolbar
-3. **Click "Start Recording"** in the popup
-4. **Perform your test actions** on the webpage:
+1. **Navigate to the webpage** you want to analyze
+2. **Click the FlowTrace extension icon** in the browser toolbar
+3. **Click "Start Tracing"** to begin capturing user interactions
+4. **Perform your actions** on the webpage:
    - Click buttons, links, and other elements
    - Type in input fields
    - Scroll the page
    - Submit forms
    - Navigate between pages
-5. **Click "Stop Recording"** when finished
-6. Your flow trace will be automatically saved with a timestamp
+5. **Click "Stop Tracing"** when finished
+6. View the captured flow data and interaction patterns
 
-### Playing Back a Flow
+### Analyzing Flow Data
 
-1. **Click the extension icon** to open the popup
-2. **Select a flow** from the "Recorded Sessions" list
-3. **Click "Play Selected Session"**
-4. Watch as FlowTrace visualizes each action with:
-   - Colored indicators showing click locations
-   - Action type labels (click, scroll, input, etc.)
-   - Automatic scrolling to follow the actions
-   - Progress indicator showing current action
-
-### Managing Flow Traces
-
-- **Delete Flows**: Click the "×" button next to any flow trace
-- **Export Flows**: Select a flow and click "Export" to save as JSON
-- **Import Flows**: Click "Import" and select a previously exported JSON file
+1. **Open the extension popup** to view recent traces
+2. **Review interaction logs** and timing data
+3. **Export flow data** for further analysis or sharing
+4. **Use insights** to optimize user experience and identify pain points
 
 ## 🛠️ Technical Details
 
-### What Gets Recorded
+### What Gets Traced
 
-The extension captures the following user interactions:
+FlowTrace captures comprehensive user interaction data:
 
-- **Mouse Events**: clicks, double-clicks
-- **Keyboard Events**: key presses and releases
+- **Mouse Events**: clicks, double-clicks, mouse movements
+- **Keyboard Events**: key presses, input changes
+- **Navigation Events**: page loads, URL changes
 - **Form Interactions**: input changes, form submissions
 - **Scroll Events**: page and element scrolling
-- **Window Events**: browser resize
+- **Timing Data**: interaction timestamps and durations
 
-### Data Structure
+### Trace Data Structure
 
-Each recorded action includes:
+Each traced interaction includes:
+
 ```javascript
 {
-  type: "click",           // Action type
-  timestamp: 1500,         // Time offset from session start (ms)
+  type: "click",           // Interaction type
+  timestamp: 1500,         // Time offset from trace start (ms)
   target: "#submit-btn",   // CSS selector of target element
-  coordinates: {           // Mouse coordinates
+  coordinates: {           // Mouse coordinates (if applicable)
     x: 100, y: 200,       // Viewport coordinates
     pageX: 100, pageY: 800 // Page coordinates
   },
@@ -96,6 +93,7 @@ Each recorded action includes:
   scrollPosition: {       // Current scroll position
     x: 0, y: 400
   },
+  url: "https://example.com", // Current page URL
   viewport: {             // Browser viewport size
     width: 1920, height: 1080
   }
@@ -104,45 +102,44 @@ Each recorded action includes:
 
 ## 🎨 Customization
 
-### Modifying Visual Indicators
+### Modifying Trace Filters
 
-You can customize the playback visualization by editing the `visualizeAction` method in `content.js`:
+You can customize what interactions get traced by editing the event listeners in `content.js`:
 
 ```javascript
-// Change indicator color and size
-indicator.style.cssText = `
-    background: #your-color;
-    width: 30px;
-    height: 30px;
-    // ... other styles
-`;
+// Add custom event filtering
+if (this.shouldTraceEvent(event)) {
+  this.traceInteraction(event.type, event);
+}
 ```
 
-### Adding New Event Types
+### Adding Custom Trace Types
 
-To record additional events, modify the `addEventListeners` method in `content.js`:
+To trace additional interactions, modify the `addEventListeners` method in `content.js`:
 
 ```javascript
 // Add new event listener
-document.addEventListener('your-event', this.handleYourEvent, true);
+document.addEventListener("your-event", this.handleCustomEvent, true);
 
 // Add corresponding handler
-handleYourEvent = (event) => {
-    this.recordAction('your-event', event);
-}
+handleCustomEvent = (event) => {
+  this.traceInteraction("custom-event", event);
+};
 ```
 
 ## 🔧 Development
 
 ### File Structure
+
 ```
-session-recorder-extension/
+FlowTrace/
 ├── manifest.json          # Extension configuration
 ├── popup.html            # Extension popup UI
 ├── popup.js             # Popup logic and controls
-├── content.js           # Main recording/playback logic
+├── content.js           # Main tracing logic
 ├── background.js        # Background service worker
-├── icons/              # Extension icons (16x16, 48x48, 128x128)
+├── icons/              # Extension icons (16x16, 32x32, 48x48, 128x128)
+├── flowtrace-preview.jpg           # Preview images and screenshots
 └── README.md           # This file
 ```
 
@@ -154,45 +151,54 @@ session-recorder-extension/
 
 ## 🤝 Use Cases
 
-### For Testers
-- **Bug Reproduction**: Record the exact steps that led to a bug
-- **Test Documentation**: Create visual test cases for manual testing
-- **Training**: Show new team members how to perform specific tests
-- **Regression Testing**: Verify that previously working flows still function
+### For QA Testers
+
+- **Bug Reproduction**: Trace the exact steps that led to a bug for easier debugging
+- **Test Coverage Analysis**: Understand which parts of the application are being tested
+- **User Journey Validation**: Verify that critical user flows work as expected
+- **Regression Testing**: Monitor changes in user interaction patterns over time
+
+### For UX Researchers
+
+- **User Behavior Analysis**: Understand how users naturally interact with your interface
+- **Usability Testing**: Identify pain points and areas for improvement
+- **Interaction Patterns**: Discover common user flows and optimize accordingly
+- **A/B Testing Support**: Compare user interaction patterns across different designs
 
 ### For Developers
-- **User Journey Analysis**: Understand how users interact with your application
-- **Performance Testing**: Identify slow interactions and optimize accordingly
-- **Accessibility Testing**: Record and analyze keyboard navigation patterns
 
-### For Product Managers
-- **Feature Validation**: Record user interactions with new features
-- **Usability Studies**: Capture and analyze user behavior patterns
-- **Stakeholder Demos**: Create reproducible demonstrations of product functionality
+- **Performance Monitoring**: Identify slow interactions and optimize accordingly
+- **Feature Usage Analytics**: See which features users actually interact with
+- **Error Tracking**: Trace user actions leading up to JavaScript errors
+- **Accessibility Testing**: Monitor keyboard navigation and screen reader interactions
 
 ## ⚠️ Important Notes
 
-- **Privacy**: This extension only records interaction metadata, not sensitive data like passwords
-- **Performance**: Recording has minimal impact, but very long sessions may use significant memory
+- **Privacy**: FlowTrace only captures interaction metadata, not sensitive data like passwords or personal information
+- **Performance**: Tracing has minimal impact, but extended sessions may accumulate data
 - **Compatibility**: Works with Chrome/Chromium-based browsers (Chrome, Edge, Brave, etc.)
-- **Limitations**: Cannot interact with browser UI elements, only webpage content
+- **Scope**: Traces webpage interactions only, not browser UI elements
+- **Data Storage**: Trace data is stored locally in your browser
 
 ## 🐛 Troubleshooting
 
 ### Extension Not Working
-1. Check that Developer Mode is enabled
-2. Reload the extension from `chrome://extensions/`
-3. Refresh the webpage you're trying to record
 
-### Recording Not Starting
-1. Make sure you're on an http/https page (not chrome:// pages)
+1. Check that Developer Mode is enabled in `chrome://extensions/`
+2. Reload the extension and refresh the webpage
+3. Ensure you're on an http/https page (not chrome:// pages)
+
+### Tracing Not Starting
+
+1. Make sure the page has fully loaded before starting
 2. Check browser console for error messages
-3. Try reloading the page and starting recording again
+3. Verify that the website allows content scripts
 
-### Playback Issues
-1. Ensure the page structure hasn't changed significantly since recording
-2. Try playing back on the same page where you recorded
-3. Check that no modal dialogs or popups are blocking the playback
+### Data Not Appearing
+
+1. Check that tracing was properly started and stopped
+2. Ensure local storage permissions are enabled
+3. Try clearing extension data and restarting
 
 ## 📝 License
 
@@ -204,4 +210,4 @@ Contributions are welcome! Please feel free to submit pull requests or open issu
 
 ---
 
-**Happy Testing!** 🚀 
+**Happy Tracing!** 🚀
